@@ -1,6 +1,18 @@
-$(function() {
+$(function(){
 
-	window.Card = Backbone.Model.extend({
+	window.FlipCard = {
+		// put settings here
+		container_width: $("#content").width(),
+		padding_width: 20,
+		padding_height: 20, 
+		box_width: 193,
+		box_height: 282, 
+		data: [{title: 'boobs', category: 'idunno', image: 'images/Bell.jpg'}, {title: 'chickn', category: 'idunno', image: 'images/Bell.jpg'}, {title: 'pizza', category: 'tester', image: 'images/Bell.jpg'},
+	        {title: 'afred', category: 'test', image: 'images/Bell.jpg'},{title: 'cats', category: 'test', image: 'images/Bell.jpg'},{title: 'dogs', category: 'test', image: 'images/Bell.jpg'},{title: 'tester', category: 'test', image: 'images/Bell.jpg'}]
+
+	};
+
+	FlipCard.Card = Backbone.Model.extend({
 		hide: function(){
 			this.set({hide: true});
 		},
@@ -10,15 +22,15 @@ $(function() {
 
 	});
 
-
-	window.Cards = Backbone.Collection.extend({
-		model: Card, 
+	FlipCard.Cards = Backbone.Collection.extend({
+		model: FlipCard.Card, 
 		filterCards: function(field, query){
 
 			// TO DO: Make this more efficient. It's pretty piss-poor, but works for now.
 			// restore and show hidden on every new input -- this means that combined 
 			// filters should be handled in the regex. kinda limited.
 			
+			// if there are hidden models, show them and restore them - used for switching filters
 			if (this.hidden){
 				this.showHiddenModels();
 				this.restoreModels(); 
@@ -31,10 +43,11 @@ $(function() {
 
 			// only set original models if the set is not already filtered
 			if (typeof this.original_models === 'undefined'){
-				this.original_models = new Cards();
+				this.original_models = new FlipCard.Cards();
 				this.original_models.reset(this.models);
 			}
 
+			// make a list of models that should be hidden
 			var models_to_hide = this.reject(function(model){
 				return re.test(model.get(field));  
 			});
@@ -43,20 +56,18 @@ $(function() {
 			this.filtered = true; 
 			this.determineLocation(); 
 
-			this.hidden = new Cards();
+			this.hidden = new FlipCard.Cards();
 			this.hidden.reset(models_to_hide);
 			this.hidden.hideModels(); 
 		},
 		determineLocation: function(){
 			// TO DO: Set these up as app "options"
 			var totalnumber = this.models.length;
-			var container_width = $("#content").width();
-			var padding_width = 30; 
-			var padding_height = 30; 
-			var box_width = 200; 
-			var box_height = 200; 
-
-			console.log(container_width);
+			var container_width = FlipCard.container_width;
+			var padding_width = FlipCard.padding_width; 
+			var padding_height = FlipCard.padding_height; 
+			var box_width = FlipCard.box_width; 
+			var box_height = FlipCard.box_height; 
 
 			// Compute # Boxer Per Row (BPR)
 			var bpr = Math.floor(container_width / (box_width + padding_width));
@@ -83,13 +94,10 @@ $(function() {
 		},
 		restoreModels: function(){
 			var original_models = this.original_models.models; 
-			console.log(original_models);
 			this.reset(original_models);
 			this.filtered = false; 
-			console.log(this);
 		},
 		showHiddenModels: function(){
-			// need to restore original
 			this.restoreModels(); 
 			this.determineLocation(); 
 			this.each(function(model){
@@ -98,7 +106,6 @@ $(function() {
 		},
 		sortModels: function(field){
 			// sets comparator to search field
-			
 			this.comparator = function(model) {
 				return model.get(field);
 			};
@@ -109,16 +116,14 @@ $(function() {
 		}
 	});
 
-	window.CardsView = Backbone.View.extend({
+	FlipCard.CardsView = Backbone.View.extend({
 		id: 'cards',
 		render: function(){
 
-			this.childViews = [];
 			this.renderedViews = []; 
 
 			this.collection.each(function(card){
-				var new_card = new CardView({model: card});
-				this.childViews.push(new_card);
+				var new_card = new FlipCard.CardView({model: card});
 				this.renderedViews.push(new_card.render().el);
 			}, this);
 
@@ -128,7 +133,7 @@ $(function() {
 		}
 	});
 
-	window.FilterView = Backbone.View.extend({
+	FlipCard.FilterView = Backbone.View.extend({
 		template: _.template($("#filter-template").html()),
 		render: function(){
 			$(this.el).html(this.template({}));
@@ -137,7 +142,7 @@ $(function() {
 		events: {
 			"click .filter": "filter",
 			"click .sort": "sort",
-			"keyup .#search": "search"
+			"keyup #search": "search"
 		},
 		filter: function(event){
 			event.preventDefault(); 
@@ -162,7 +167,7 @@ $(function() {
 		}
 	});
 
-	window.CardView = Backbone.View.extend({
+	FlipCard.CardView = Backbone.View.extend({
 		tagName: 'div',
 		className: 'card',
 		template: _.template($("#card-template").html()),
@@ -176,7 +181,7 @@ $(function() {
 			if (this.model.get("hide")){
 				this.$el.addClass('hide');
 			} else {
-				$(this.el).html(this.template(this.model.toJSON()));
+				this.$el.html(this.template(this.model.toJSON()));
 				this.$el.removeClass('hide');
 				return this; 
 			}
@@ -194,29 +199,25 @@ $(function() {
 			}
 		}
 	});
-	// try merely setting card to 'hide' when filtered out. if that doesn't work,
-	// i'll need to store .remove and .unbind them, recreating them if need be.
 
-	window.AppView = Backbone.View.extend({
-		initialize: function(){
-			this.cards = new Cards(); 
-			
-			data = [{title: 'boobs', category: 'idunno'}, {title: 'chickn', category: 'idunno'}, {title: 'pizza', category: 'tester'},
-		{title: 'afred', category: 'test'},{title: 'cats', category: 'test'},{title: 'dogs', category: 'test'},{title: 'tester', category: 'test'},
-	{title: 'tester', category: 'test'},{title: 'tester', category: 'idunno'},{title: 'test', category: 'test'},{title: 'mice', category: 'test'},
-{title: 'steve jobs', category: 'idunno'},{title: 'bill gates', category: 'idunno'}];
+	FlipCard.AppView = Backbone.View.extend({
+		start: function(){
+			this.cards = new FlipCard.Cards(); 
 
-			this.cards.add(data);
+			this.cards.add(FlipCard.data);
 			this.cards.determineLocation(); 
 
-			this.cardsview = new CardsView({collection: this.cards});
+			this.cardsview = new FlipCard.CardsView({collection: this.cards});
 			$("#content").append(this.cardsview.render().el);
 
-			this.filterview = new FilterView({collection: this.cards});
+			this.filterview = new FlipCard.FilterView({collection: this.cards});
 			$("#filters").append(this.filterview.render().el);
 		}
 	});
 
-appview = new AppView(); 
+
+var appview = new FlipCard.AppView(); 
+appview.start(); 
 
 });
+
