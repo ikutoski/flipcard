@@ -1,5 +1,5 @@
 div#filters {
-      padding: 0px 13px 0px 13px;
+      padding: 10px 13px 5px 13px;
 
       float: left;
 }
@@ -19,6 +19,8 @@ div#cards {
       position: relative;
       overflow: visible;
       width: 100%;
+            -webkit-perspective: 1500px;
+
 }
 
 div.card {
@@ -191,10 +193,23 @@ p {
       -webkit-box-shadow: 0 5px 25px rgba(0,0,0,0.2);
 }
 
+@-webkit-keyframes fliptease{
+      0%{-webkit-transform: rotateY(0deg);}
+      50%{-webkit-transform: rotateY(20deg);}
+      100%{-webkit-transform: rotateY(0deg);}
+}
+
+.card:hover {
+      -webkit-animation:fliptease 1s;
+
+}
+
+
+
 /*FILTERS*/
 
 button.btn {
-      font: 13px "HelveticaNeue", "Helvetica Neue", Helvetica, Arial;
+      font: 12px "HelveticaNeue", "Helvetica Neue", Helvetica, Arial;
       padding: 7px 13px 7px 13px; 
       border: 1px solid #bbb;
       border-bottom: 1px solid #aaa;
@@ -223,9 +238,16 @@ button.red {
       background-image: -webkit-linear-gradient(#de995e, #ce6c19); 
 }
 button.green {
-      border: 1px solid #bbb;
-      background-image: -webkit-linear-gradient(#bdd6bc, #689066); 
+    border: 1px solid #bbb;
+    background-image: -webkit-linear-gradient(#6ee38f, #01aa31); 
 }
+
+button.light {
+         background-image: -webkit-linear-gradient(#f3f3f3, #cbcbcb); 
+    border: 1px solid #ccc;
+ 
+}
+
 
 button.yellow {
       background-image: -webkit-linear-gradient(#efe755, #9a9305); 
@@ -239,7 +261,9 @@ div.btn-group button.btn {
 }
 
 div.btn-group button.active {
-     -webkit-box-shadow: inset 0px 5px 10px rgba(0,0,0,.10);   
+     -webkit-box-shadow: inset 0px 5px 10px rgba(0,0,0,.10);        
+    background: #ccc;
+    color: rgba(0,0,0,.60);
 }
 
 
@@ -247,8 +271,8 @@ div.btn-group {
       display: inline-block;
      float: left;
      padding: 0px; 
-     -webkit-box-shadow: 0 2px 30px rgba(0,0,0,0.15);
-     margin: 5px; 
+     -webkit-box-shadow: 0 2px 30px rgba(0,0,0,0.10);
+     margin: 5px 10px 5px 10px; 
 }
 
 div.btn-group  button.btn{
