@@ -1,3 +1,7 @@
+body {
+      background: #dedede;
+}
+
 div#filters {
       padding: 10px 13px 5px 13px;
 
@@ -10,10 +14,14 @@ div#filters:after {
 
 div#content {
       float: left;
-      width: 875px;
+      width: 100%;
+      position: relative;
+      border: 1px solid blue;
+
 }
 
 div#cards {
+  border: 1px solid black;
       margin: 0px;
       height: 100%;
       position: relative;
@@ -24,6 +32,7 @@ div#cards {
 }
 
 div.card {
+
       -webkit-transform: translate3d(0, 0, 0) scale3d(1,1,1);
       -moz-transform: translate3d(0, 0, 0) scale3d(1,1,1);
       -o-transform: translate3d(0, 0, 0) scale3d(1,1,1);
@@ -44,7 +53,7 @@ div.card {
       display: block;
       position: absolute;
       width: 193px;
-      height: 282px;
+      height: 200px;
 
       -webkit-border-radius: 5px;
       -moz-border-radius: 5px;
@@ -54,6 +63,7 @@ div.card {
       -moz-perspective: 600px;
       cursor: pointer;
       float: left;
+      border: 1px solid black;
 }
 
 img {
@@ -85,14 +95,20 @@ div.caption {
       color: white;
       border-bottom-left-radius: 5px;
       border-bottom-right-radius: 5px;
+      text-align: left;
 }
 
+
 p {
-      margin: 2px;
+      margin: 5px 8px 5px 8px;
       padding: 2px;
       font-family: Helvetica, sans-serif;
-      font-size: 10px;
+      font-size: 11px;
 }
+
+div.caption p {
+}
+
 
 /* CARDS */
 
@@ -209,33 +225,34 @@ p {
 /*FILTERS*/
 
 button.btn {
-      font: 12px "HelveticaNeue", "Helvetica Neue", Helvetica, Arial;
-      padding: 7px 13px 7px 13px; 
-      border: 1px solid #bbb;
-      border-bottom: 1px solid #aaa;
-      height: 30px; 
-      text-shadow: 0 2px 3px rgba(255, 255, 255, .25);
-      cursor: pointer; 
-      border-radius: 3px;    
-      background-image: -webkit-linear-gradient(top, #e8e8e8, #a3a2a2);
-      -webkit-box-shadow: 0 2px 30px rgba(0,0,0,0.15);
-      background-size: 1px 45px; 
-      color: #555;
-      -webkit-transition: background 0.5s; 
+font: 12px "HelveticaNeue", "Helvetica Neue", Helvetica, Arial;
+padding: 7px 13px 7px 13px; 
+         border: 1px solid #bbb;
+border-bottom: 1px solid #aaa;
+height: 30px; 
+    text-shadow: 0 2px 3px rgba(255, 255, 255, .25);
+cursor: pointer; 
+border-radius: 3px;    
+background-image: -webkit-linear-gradient(top, #e8e8e8, #a3a2a2);
+
+    background-size: 1px 45px; 
+    color: #555;
+    -webkit-transition: background 0.5s; 
 }
 
 button.btn:hover {
-      background-position: 15px; 
+   background-position: 15px; 
 }
 
 button.active {
-      background: #ababab;
-      -webkit-box-shadow: inset 0px 5px 10px rgba(0,0,0,.10); 
-      cursor: default; 
+   background: #bbb;
+    -webkit-box-shadow: inset 0px 5px 10px rgba(0,0,0,.10); 
+    cursor: default; 
+
 }
 
 button.red {
-      background-image: -webkit-linear-gradient(#de995e, #ce6c19); 
+    background-image: -webkit-linear-gradient(#de995e, #ce6c19); 
 }
 button.green {
     border: 1px solid #bbb;
@@ -244,66 +261,69 @@ button.green {
 
 button.light {
          background-image: -webkit-linear-gradient(#f3f3f3, #cbcbcb); 
-    border: 1px solid #ccc;
+    border: 1px solid #bbb; 
  
 }
 
+button.blue {
+    
+}
 
 button.yellow {
       background-image: -webkit-linear-gradient(#efe755, #9a9305); 
 }
 
+
+
+
 div.btn-group button.btn {
-      border-radius: 0px; 
-      margin: 0px;  
-      float: left;   
-      -webkit-box-shadow: 0px 0px 0px;      
+ border-radius: 0px; 
+margin: 0px;  
+float: left;   
 }
 
 div.btn-group button.active {
      -webkit-box-shadow: inset 0px 5px 10px rgba(0,0,0,.10);        
-    background: #ccc;
+    background: rgba(0,0,0,.15); 
     color: rgba(0,0,0,.60);
 }
 
 
 div.btn-group {
-      display: inline-block;
-     float: left;
-     padding: 0px; 
-     -webkit-box-shadow: 0 2px 30px rgba(0,0,0,0.10);
-     margin: 5px 10px 5px 10px; 
+    float: left;
+    padding: 0px; 
+margin: 0px; 
+    display: inline-block;    
+margin: 5px 10px 5px 10px; 
 }
 
 div.btn-group  button.btn{
-      border-radius: 0px;
-      margin-left: -1px; 
+    border-radius: 0px;
+     margin-left: -1px; 
 
 }
 
 div.btn-group:after {
-      clear: both; 
+    clear: both; 
 }
 
 div.btn-group button.btn:first-child {
-      border-top-left-radius: 3px;
-      border-bottom-left-radius: 3px;  
-      margin-left: 0px;    
+ border-top-left-radius: 3px;
+border-bottom-left-radius: 3px;  
+margin-left: 0px;    
 }
 
 div.btn-group button.btn:last-child {
-      border-top-right-radius: 3px;
-      border-bottom-right-radius: 3px;    
+ border-top-right-radius: 3px;
+border-bottom-right-radius: 3px;    
 }
 
 div.btn-group input.input {
-      float: left;
-      height: 30px; 
-      padding: 4px;
-      width: 150px; 
-      margin: 0px;
-      border: 1px solid #ccc;
-      border-bottom-left-radius: 3px;
-      border-top-left-radius: 3px;     
+    width: 175px; 
+    float: left;
+height: 30px; 
+padding: 4px; 
+border: 1px solid #ccc;
+ border-bottom-left-radius: 3px;
+border-top-left-radius: 3px;     
 }
-​
