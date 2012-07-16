@@ -14,14 +14,12 @@ $(function() {
 	Browser.version = "0.0.1";
 
 	Browser.options = {
-		  boxesPerRow: 5
+		  containerWidth: $("#content").width()
+		, boxesPerRow: 5
 		, paddingWidth: 20
 		, paddingHeight: 20
-		, boxHeight: 180
-		, boxWidth: 150
-		, wrapper: "#browser"
-		, toolbar: "#browser-toolbar"
-		, searchField: "#browser-search"
+		, boxHeight: 200
+		, boxWidth: 200
 	};
 
 
@@ -39,14 +37,19 @@ $(function() {
 		model: Browser.Card,
 		filterCards: function(field, query){
 
-			if (!_.isUndefined(this.hidden)) this.showHiddenModels();
-			
+			// CLEAN THIS UP
+
+			if (!_.isUndefined(this.hidden)){
+				this.showHiddenModels();
+				this.restoreModels(); 
+			}
 
 			// Returns filtered card list
 			var re = new RegExp(query, "i");
 			var filtered = this.filter(function(card){
 				return re.test(card.get(field));
 			});
+
 
 			if (_.isUndefined(this.originalModels)){
 				this.originalModels = new Browser.Cards();
@@ -57,6 +60,7 @@ $(function() {
 				return re.test(card.get(field));
 			});
 
+
 			this.reset(filtered);
 			this.filtered = true;
 			this.determineLocation();
@@ -65,36 +69,19 @@ $(function() {
 			this.hidden.reset(ModelsToHide);
 			this.hidden.hideModels(); 
 		},
-
-		// Compute # Boxer Per Row (BPR)
-		getBoxesPerRow: function(){
-			var containerWidth = $(Browser.options.wrapper).width()
-				, boxWidth = Browser.options.boxWidth
-				, paddingWidth = Browser.options.paddingWidth; 
-
-			var boxesPerRow = Math.floor(containerWidth / (boxWidth + paddingWidth));
-			return boxesPerRow; 
-		},
-
-		// Compute padding width
-		getPaddingWidth: function(){
-			var containerWidth = $(Browser.options.wrapper).width()
-				, boxWidth = Browser.options.boxWidth
-				, paddingWidth = Browser.options.paddingWidth
-				, boxesPerRow = this.getBoxesPerRow(); 
-
-			var mx = (containerWidth - (boxesPerRow * boxWidth) - (boxesPerRow -1) * paddingWidth) * 0.5; 
-			return mx; 
-		},
-
-		// Determine location of a card
-		determineLocation: function(){
-			var mx = this.getPaddingWidth()
-				, boxesPerRow = this.getBoxesPerRow()
+		determineLocation: function(width){
+			var totalNumber = this.models.length
+				, containerWidth = width || $("#content").width() || Browser.options.containerWidth
 				, paddingWidth = Browser.options.paddingWidth
 				, paddingHeight = Browser.options.paddingHeight
 				, boxHeight = Browser.options.boxHeight
 				, boxWidth = Browser.options.boxWidth;
+
+			// Compute # Boxer Per Row (BPR)
+			var boxesPerRow = Math.floor(containerWidth / (boxWidth + paddingWidth));
+			
+			// Compute padding width
+			var mx = (containerWidth - (boxesPerRow * boxWidth) - (boxesPerRow -1) * paddingWidth) * 0.5; 
 
 			this.each(function(cardModel, index){
 				var r = Math.floor(index/boxesPerRow);
@@ -107,22 +94,8 @@ $(function() {
 					position_left: left,
 				});
 			});
+
 			return this; 
-		},
-
-		// Determine height of wrapper DIV and trigger view event
-		determineWrapperHeight: function(){
-			var totalNumber = this.models.length
-				, paddingHeight = Browser.options.paddingHeight
-				, boxHeight = Browser.options.boxHeight
-				, boxWidth = Browser.options.boxWidth
-				, boxesPerRow = this.getBoxesPerRow(); 
-
-			var totalRows = Math.ceil(totalNumber/boxesPerRow);
-			var height = totalRows * (boxHeight + paddingHeight);
-		
-			this.trigger("setHeight", height);
-			return height; 
 		},
 		hideModels: function(){
 			this.each(function(model) {
@@ -136,6 +109,7 @@ $(function() {
 		},
 		showHiddenModels: function(){
 			this.restoreModels();
+			this.determineLocation();
 			this.each(function(model) {
 				model.show();
 			});
@@ -155,23 +129,14 @@ $(function() {
 	Browser.CardsView = Backbone.View.extend({
 		tagName: "div",
 		className: "cards",
-		initialize: function(options){
-			this.collection.on('setHeight', this.setHeight, this);
-		},
 		render: function(){
 			var views = this.collection.map(function(card){
-				// only this should call render view, which it does.
-				var newCard = new Browser.CardView({ 
-					  model : card
-				});
+				var newCard = new Browser.CardView({ model : card});
 				return newCard.render().el; 
 			}, this);
 
 			this.$el.append(views);
 			return this; 
-		},
-		setHeight: function(height){			
-			this.$el.height(height);
 		}
 		
 	});
@@ -179,30 +144,25 @@ $(function() {
 	Browser.CardView = Backbone.View.extend({
 		tagName: 'div',
 		className: 'card',
-		template: _.template($("#bento-item").html()),
+		template: _.template($("#card-template").html()),
 		initialize: function(){
-			this.model.on('change', this.redraw, this);
+			this.model.on('change', this.render, this);
 		},
-		render: function(options){
-			this.$el.html(this.template(this.model.toJSON()));
-			this.redraw(); 
-			return this; 
-		},
-		redraw: function(){
-			this.changePosition().showOrHideCard();
-		},
-		changePosition: function(){
+		render: function(){
 			this.$el.css({
 				'top': this.model.get("position_top"),
-				'left': this.model.get("position_left")
+				'left': this.model.get("position_left"),
 			});
-			return this; 
+			if (this.model.get("hide")) {
+				this.$el.addClass('hide');
+			} else {
+				this.$el.html(this.template(this.model.toJSON()));
+				this.$el.removeClass('hide');
+				return this; 
+			}
 		},
-		showOrHideCard: function(){
-			console.log("show or hide card called");
-			if (this.model.get("hide")) this.$el.addClass('hide');
-			else this.$el.removeClass('hide');
-			return this;
+		events: {
+			'click': 'flipCard'
 		},
 		flipCard: function(event){
 			var $card = $(event.currentTarget);
@@ -211,11 +171,8 @@ $(function() {
 		}
 	});
 
-/*
-
-*/
 	Browser.FilterView = Backbone.View.extend({
-		template: _.template($("#browser-toolbar-template").html()),
+		template: _.template($("#filter-template").html()),
 		render: function(){
 			this.$el.html(this.template({}));
 			return this; 
@@ -226,7 +183,6 @@ $(function() {
 			'keyup #bento-search'	: 'searchCards' 
 		},
 		filterCards: function(event){
-			console.log("filter called");
 			event.preventDefault();
 			var filterField = $(event.target).data('filter-category');
 			if (filterField === "all") this.collection.showHiddenModels();
@@ -235,44 +191,34 @@ $(function() {
 		sortCards: function(event){
 			event.preventDefault();
 			var sortField = $(event.target).data('sort-field');
-						console.log("sort called", sortField);
-
 			if (!_.isUndefined(sortField)) this.collection.sortModels(sortField);
 		},
 		searchCards: function(event){
 			event.preventDefault();
-			var query = $(Browser.options.searchField).val();
+			var query = $("#search").val();
 			this.collection.filterCards("title", query);
 		}
 	});
 
-/*
-	The appview handles initialization of the browser by creating the
-	necessary collections and views. It also handles options/defaults.
-*/
+
 	Browser.AppView = Backbone.View.extend({
 		initialize: function(options){
 
-			Browser.options = _.defaults(options, Browser.options);
 
-			// Create new Cards collection, add data, and determine location.
 			this.cards = new Browser.Cards();
-			this.cards.add(Browser.options.data).determineLocation();
+			this.cards.add(options.data).determineLocation();
 			
-			// Create the view with the data and append to DOM
 			this.cardsView = new Browser.CardsView({
 				collection: this.cards
 			});
 
-			this.cards.determineWrapperHeight();
+			$("#content").append(this.cardsView.render().el);
 
-			$(Browser.options.wrapper).append(this.cardsView.render().el);
-
-			// Create filters/sorts/search view and append to DOM
 			var filterView = new Browser.FilterView({
 				collection: this.cards
 			});
-			$(Browser.options.toolbar).append(filterView.render().el);
+
+			$("#filters").append(filterView.render().el);
 		},
 		redraw: function(){
 			this.cards.determineLocation(); 
@@ -284,3 +230,10 @@ $(function() {
 })(Backbone, _, window.jQuery || window.Zepto || window.ender);
 
 });
+
+// var tester = new Bento.AppView({data: [{name: "hello"}, {name: "hello"}
+// 		, {name: "hello"}, {name: "hello"} , {name: "hello"}, {name: "hello"}, {name: "hello"}
+// 		, {name: "hello"} , {name: "hello"}, {name: "hello"}, {name: "hello"}]});
+// 	$(window).on('resize', function(hello){
+// 		tester.cards.determineLocation();
+// 	});
