@@ -1,8 +1,8 @@
 /**
- * Bento-Browser
+ * FlipCard
  * (c) 2012 Ben McMahen
  *
- * Bento-Browser may be freely distributed under the MIT license.
+ * FlipCard may be freely distributed under the MIT license.
  */
 
 $(function() {
@@ -21,23 +21,37 @@ $(function() {
 			boxWidth: 150,
 			wrapper: "#browser",
 			toolbar: "#browser-toolbar",
-			searchField: "#browser-search"
+			searchField: "#browser-search",
+			filterClass: ".browser-filter",
+			sortClass: ".browser-sort",
+			cardViewTemplate: "",
+			toolbarTemplate: ""
 		};
 
 
-		// Generic Card class with hide and show functions
+/*
+	Basic model for each card, only responsible for setting hide attribute. 
+*/
 		Browser.Card = Backbone.Model.extend({
+
 			hide: function() {
 				this.set({
 					hide: true
 				});
 			},
+
 			show: function() {
 				this.set({
 					hide: false
 				});
 			}
+
 		});
+
+/*
+	Represents a collection of cards, and the primary logic for 
+	filtering, sorting, and determining the location fo each card. 
+*/
 
 		Browser.Cards = Backbone.Collection.extend({
 
@@ -70,6 +84,7 @@ $(function() {
 
 			// Compute # Boxer Per Row (BPR)
 			getBoxesPerRow: function() {
+
 				var containerWidth = $(Browser.options.wrapper).width(),
 					boxWidth = Browser.options.boxWidth,
 					paddingWidth = Browser.options.paddingWidth;
@@ -91,6 +106,7 @@ $(function() {
 
 			// Determine location of a card
 			determineLocation: function() {
+
 				var mx = this.getPaddingWidth(),
 					boxesPerRow = this.getBoxesPerRow(),
 					paddingWidth = Browser.options.paddingWidth,
@@ -159,44 +175,64 @@ $(function() {
 			}
 		});
 
+/*
+	Primarily the wrapper view for each Card View. Render should only be called
+	when entire collection is being re-rendered. (i.e., the first load);
+*/
 		Browser.CardsView = Backbone.View.extend({
+
 			tagName: "div",
+			
 			className: "cards",
+			
 			initialize: function(options) {
 				this.collection.on('setHeight', this.setHeight, this);
 			},
+			
 			render: function() {
 				var views = this.collection.map(function(card) {
+
 					var newCard = new Browser.CardView({
 						model: card
+
 					});
-					return newCard.render().el;
-				}, this);
+					return newCard.render().el;	
+				});
 
 				this.$el.append(views);
 				return this;
 			},
+			
 			setHeight: function(height) {
 				this.$el.height(height);
 			}
 
 		});
-
+/*
+	CardView class represents each individual card and is responsible
+	for the drawing each card. 
+*/
 		Browser.CardView = Backbone.View.extend({
+
 			tagName: 'div',
+
 			className: 'card',
-			template: _.template($("#bento-item").html()),
+
 			initialize: function() {
+				this.template = Browser.options.cardViewTemplate;
 				this.model.on('change', this.redraw, this);
 			},
+
 			render: function(options) {
 				this.$el.html(this.template(this.model.toJSON()));
 				this.redraw();
 				return this;
 			},
+
 			redraw: function() {
 				this.changePosition().showOrHideCard();
 			},
+
 			changePosition: function() {
 				this.$el.css({
 					'top': this.model.get("position_top"),
@@ -204,11 +240,13 @@ $(function() {
 				});
 				return this;
 			},
+
 			showOrHideCard: function() {
 				if (this.model.get("hide")) this.$el.addClass('hide');
 				else this.$el.removeClass('hide');
 				return this;
 			},
+
 			flipCard: function(event) {
 				var $card = $(event.currentTarget);
 				if ($card.hasClass('flip')) $card.removeClass('flip');
@@ -216,44 +254,62 @@ $(function() {
 			}
 		});
 
-		/*
+/*
 	The filterview provides built-in methods and events for using filters
 	with the collection data. This needs to be generalized. 
 */
 		Browser.FilterView = Backbone.View.extend({
-			template: _.template($("#browser-toolbar-template").html()),
+			
+			initialize: function(){
+				this.template = Browser.options.toolbarTemplate;
+			},
+
 			render: function() {
 				this.$el.html(this.template({}));
 				return this;
 			},
-			events: {
-				'click .filter': 'filterCards',
-				'click .sort': 'sortCards',
-				'keyup #bento-search': 'searchCards'
+
+			events: function(){
+				var _events = {};
+
+				_events[ 'keyup ' + Browser.options.searchField ] = 'searchCards';
+				_events[ 'click ' + Browser.options.filterClass ] = 'filterCards';
+				_events[ 'click ' + Browser.options.sortClass ] = 'sortCards';
+
+				return _events;
 			},
+			
 			filterCards: function(event) {
 				event.preventDefault();
+
 				var filterField = $(event.target).data('filter-category');
+
 				if (filterField === "all") this.collection.showHiddenModels();
 				else this.collection.filterCards("category", filterField);
 			},
+			
 			sortCards: function(event) {
 				event.preventDefault();
+
 				var sortField = $(event.target).data('sort-field');
+
 				if (!_.isUndefined(sortField)) this.collection.sortModels(sortField);
 			},
+			
 			searchCards: function(event) {
 				event.preventDefault();
+
 				var query = $(Browser.options.searchField).val();
 				this.collection.filterCards("title", query);
 			}
 		});
 
-		/*
+/*
 	The appview handles initialization of the browser by creating the
 	necessary collections and views. It also handles options/defaults.
 */
 		Browser.AppView = Backbone.View.extend({
+
 			initialize: function(options) {
 
 				// Set Browser Options
@@ -276,6 +332,7 @@ $(function() {
 				});
 				$(Browser.options.toolbar).append(filterView.render().el);
 			},
+
 			redraw: function() {
 				this.cards.determineLocation();
 			}
