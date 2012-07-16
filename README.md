@@ -33,10 +33,9 @@ In a Javascript file included in your HTML file, you need to instantiate a new F
         , toolbar: "#browser-toolbar"
         , searchField: "#bento-search"
         , cardViewTemplate: _.template($("#bento-item").html())
-        , toolbarTemplate: _.template($("#browser-toolbar-template").html
+        , toolbarTemplate: _.template($("#browser-toolbar-template").html())
         , sortClass: ".browser-sort"
         , filterClass: ".browser-filter"
-        ())
       });
 
 ```
@@ -59,6 +58,7 @@ Your templates can be built using Handlebars, Hogan, or whatever template engine
                   <input id="bento-search" type="text" class="input" placeholder="Filter Cards...">
 </script>
 ```
+The field you want the cards sorted by should be in the data-sort-field attribute. 
 
 Want to add some custom javascript functions? Let's say you want to trigger an event when the user clicks on one of the cards. You would do this using the prototype attribute. 
 
