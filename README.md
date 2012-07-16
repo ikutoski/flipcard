@@ -1,27 +1,42 @@
-flipcard
-========
+#flipcard
 
-A mini-clone of isotope (http://isotope.metafizzy.co/) made using Backbone.js and Underscore themes. The reason for this? In part, I wanted a project to test out Backbone.js... and, in part, because I wanted something like isotope but didn't need the full feature set. I also wanted some additional functionality, like the ability to flip and search cards, and to feed the data through JSON instead of the DOM (allowing it to be easily plugged into a REST framework).
+A mini-clone of isotope (http://isotope.metafizzy.co/) made using Backbone.js. Why? Because I wanted to learn Backbone.js and because I wanted something like isotope, but with a smaller footprint and some (specialized) flexibility. I wanted the data to exist in JSON (instead of the DOM), I only needed a basic grid-view, and I wanted a "flip" functionality. 
 
-This was developed for the Living Archives in Western Canada Project -- http://www.eugenicsarchive.ca
+This project was funded by and developed for the Living Archives in Western Canada Project.  -- http://www.eugenicsarchive.ca
 
-Dependencies: 
-========
+##Dependencies: 
 
-Since this project is built using Backbone.js it requires jquery, underscore, and backbone.
-
+Flipcard requires jQuery, Underscore, and Backbone. 
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 <script src="http://ajax.cdnjs.com/ajax/libs/underscore.js/1.3.3/underscore-min.js" type="text/javascript"></script>
 <script src="http://documentcloud.github.com/backbone/backbone-min.js" type="text/javascript"></script>
 
-Use: 
-========
+##Use: 
 
-At this stage, it's not that easy to plug into a website unless you know where all the code is burried. One of my goals is to make a plugin architecture that will make it easy to feed data and plop it into a website. 
+In a Javascript file included in your HTML file, you need to instantiate a new FlipCard.AppView and pass in certain attributes, including your JSON data object, and the ID or Class of your wrapper, toolbar, and searchField DOM objects.
 
-For now, there are three main parts to be concerned with:
+```javascript
+    var myBrowser = new FlipCard.AppView({
+          data: data
+        , wrapper: "#browser"
+        , toolbar: "#browser-toolbar"
+        , searchField: "#browser-search"
+      });
+```
 
-(1) The JSON data object, contained in the AppView -- var data = [{}]; 
-(2) The Underscore.js themes. Contained on the main html page, this let's you draw one theme for all of your cards without repeating code. 
-(3) flipcard.css. All of the animation is pretty much CSS3 transforms, and it's located in this css file. Not sure how this degrades in IE8 and older. 
+You'll need to include two templates, using underscore templating. Here's an example template for each card.
+
+```javascript
+<script type="text/template" id="bento-item">
+                  <div class="bento-item dropdown">
+                    <img src="<%= thumbnail %>">
+                    <% position_left %>
+                    <p> <%= title %> </p>
+                    <button class="btn grey dropdown-toggle" data-toggle="dropdown">
+                      <i class="icon-cog"></i>
+                      <span class="caret-dark"></span>
+                    </button>
+                  </div>
+</script>
+```
