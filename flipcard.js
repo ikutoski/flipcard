@@ -66,20 +66,27 @@ $(function() {
 					return re.test(card.get(field));
 				});
 
+
+				console.log('filtered models', filtered);
+
 				if (_.isUndefined(this.originalModels)) {
 					this.originalModels = new Browser.Cards(this.models);
 				}
 
-				var ModelsToHide = this.reject(function(card) {
+				console.log('original models', this.originalModels);
+
+				var modelsToHide = this.reject(function(card) {
 					return re.test(card.get(field));
 				});
+
+				console.log('models to hide', modelsToHide);
 
 				this.reset(filtered);
 				this.filtered = true;
 				this.determineLocation();
 
 				this.hidden = new Browser.Cards();
-				this.hidden.reset(ModelsToHide).hideModels();
+				this.hidden.reset(modelsToHide).hideModels();
 			},
 
 			// Compute # Boxer Per Row (BPR)
@@ -106,6 +113,8 @@ $(function() {
 
 			// Determine location of a card
 			determineLocation: function() {
+
+				console.log("determine location called");
 
 				var mx = this.getPaddingWidth(),
 					boxesPerRow = this.getBoxesPerRow(),
@@ -147,6 +156,7 @@ $(function() {
 
 			// Hides each model in the collection. 
 			hideModels: function() {
+				console.log("hide models", this);
 				this.each(function(model) {
 					model.hide();
 				});
@@ -154,12 +164,14 @@ $(function() {
 
 			// Helper function for restoring models in collection.
 			restoreModels: function() {
+				console.log("restore models called");
 				this.reset(this.originalModels.models);
 				this.filtered = false;
 			},
 
 			// Helper function for showing and restoring models in collection.
 			showHiddenModels: function() {
+				console.log("show hidden models called");
 				this.restoreModels();
 				this.each(function(model) {
 					model.show();
@@ -284,7 +296,12 @@ $(function() {
 
 				var filterField = $(event.target).data('filter-category');
 
-				if (filterField === "all") this.collection.showHiddenModels();
+				console.log("filterCards called");
+
+				if (filterField === "all") {
+					this.collection.showHiddenModels();
+					this.collection.determineLocation();
+				}
 				else this.collection.filterCards("category", filterField);
 			},
 			
